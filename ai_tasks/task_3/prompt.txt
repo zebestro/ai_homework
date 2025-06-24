@@ -1,0 +1,37 @@
+STEPS:
+
+    1. I²C Communication in Plain C:
+       
+       i2c_tmp102.c 
+
+
+    2. Wrap in a C++ Class:
+
+       tmp102.cpp 
+
+
+    3. Ring Buffer Logic (without hardware):
+
+       ring_buff.cpp 
+
+
+    4. FreeRTOS / Timer Integration:
+
+        task.cpp
+
+
+    5. UART Output (Raw and Average):
+
+        uart_out.cpp
+
+
+    6. Testing Strategy (Prompt Suggestions)
+
+        test.cpp
+
+
+SUMMARY:
+
+    - Isolate hardware-dependent parts.
+    - Make the logic testable without needing actual devices.
+    - Allow mocking and test coverage in CI.

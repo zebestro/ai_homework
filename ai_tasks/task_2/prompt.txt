@@ -1,0 +1,48 @@
+Problem in the Original Code:
+
+    explicit Led(uint8_t pin) : pin_(pin) {
+        PORTA->ODR |= (1u << pin_);
+    }
+
+    Issue: This constructor modifies the PORTA->ODR register immediately during object construction, setting the pin bit before any test or code can observe the initial state.
+
+    This causes unit tests that want to verify the initial state of the output register (ODR) to fail or be unreliable — since the constructor has already changed the state before toggle() is ever called.
+
+
+Fix:
+
+    To allow tests to verify the initial state and behavior of toggle(), the constructor should not modify any hardware registers. The fix is simple:
+
+    explicit Led(uint8_t pin) : pin_(pin) { /* removed PORTA->ODR |= ... */ }
+
+    With this change:
+        1. The register remains untouched at construction.
+        2. Unit tests can inspect and validate the register state before and after calling toggle().
+
+
+
+Suggested Commit Message:
+
+    Fix: Removed register modification from Led constructor
+
+    Previously, the Led constructor modified PORTA->ODR immediately by setting the pin bit.
+    This side effect made it impossible to verify the register's initial state during unit testing.
+    Now the constructor only stores the pin number; the register is modified exclusively through toggle().
+
+
+Example Test:
+
+    void test_led_toggle_behavior() {
+        GPIO fake_gpio = {0, 0};
+        PORTA = &fake_gpio;
+
+        Led led(3); 
+        assert(PORTA->ODR == 0);
+
+        led.toggle();
+        assert(PORTA->ODR == (1u << 3));
+
+        led.toggle();
+        assert(PORTA->ODR == 0);
+    }
+
